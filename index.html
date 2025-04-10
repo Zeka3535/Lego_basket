@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Парсер корзины Lego из файла</title>
     <style>
-        /* Стили оставляем теми же, что и в предыдущих примерах */
         body {
             font-family: sans-serif;
             line-height: 1.6;
@@ -26,24 +25,23 @@
         }
         .input-area {
             display: flex;
-            flex-direction: column; /* Элементы друг под другом */
-            gap: 15px; /* Увеличим отступ */
+            flex-direction: column;
+            gap: 15px;
             margin-bottom: 20px;
-            align-items: center; /* Центрируем по горизонтали */
+            align-items: center;
         }
         .input-area label {
-             font-weight: bold;
-             margin-bottom: 5px; /* Небольшой отступ снизу */
+            font-weight: bold;
+            margin-bottom: 5px;
         }
         .input-area input[type="file"] {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            width: 100%; /* На всю ширину контейнера */
-            max-width: 500px; /* Ограничим максимальную ширину */
+            width: 100%;
+            max-width: 500px;
             box-sizing: border-box;
         }
-         /* Стили для кнопки input[type=file], если нужно */
         input[type="file"]::file-selector-button {
             margin-right: 15px;
             border: none;
@@ -57,21 +55,20 @@
         input[type="file"]::file-selector-button:hover {
             background: #0056b3;
         }
-
         .input-area button {
-            padding: 12px 20px; /* Кнопка побольше */
-            background-color: #28a745; /* Зеленый цвет */
+            padding: 12px 20px;
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            font-size: 1.1em; /* Шрифт побольше */
-            width: 100%; /* На всю ширину */
+            font-size: 1.1em;
+            width: 100%;
             max-width: 300px;
         }
         .input-area button:hover {
-            background-color: #218838; /* Темнее при наведении */
+            background-color: #218838;
         }
         .parts-list {
             margin-top: 20px;
@@ -126,40 +123,33 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
-         .warning-message {
-             background-color: #fff3cd;
-             color: #856404;
-             border: 1px solid #ffeeba;
-         }
+        .warning-message {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>Парсер корзины Lego из файла</h1>
-
         <div class="input-area">
             <label for="htmlFileInput">Выберите сохраненный HTML файл корзины:</label>
             <input type="file" id="htmlFileInput" accept=".html, .htm">
             <button id="processFileButton">Обработать файл</button>
         </div>
-
         <div id="messageArea">
-            <!-- Сообщения для пользователя -->
-             <div class="info-message">
+            <div class="info-message">
                 <strong>Как использовать:</strong>
                 <ol style="text-align: left; margin-top: 10px;">
                     <li>Откройте страницу с общей корзиной в браузере (например, <code style="background: #eee; padding: 2px 4px; border-radius: 3px;">https://shop-device.ru/sharebasket/...</code>).</li>
-                    <li>Сохраните эту страницу на ваш компьютер (обычно через меню Файл → Сохранить как..., или Ctrl+S). Выберите тип файла "Веб-страница, полностью" или "HTML".</li>
-                    <li>Нажмите кнопку "Выберите файл" выше и укажите сохраненный HTML файл.</li>
-                    <li>Нажмите кнопку "Обработать файл".</li>
+                    <li>Сохраните эту страницу на ваш компьютер (Ctrl+S или Файл → Сохранить как...). Выберите тип "HTML Only".</li>
+                    <li>Нажмите "Выберите файл" и загрузите сохраненный HTML-файл.</li>
+                    <li>Нажмите "Обработать файл".</li>
                 </ol>
             </div>
         </div>
-
-        <div id="partsList" class="parts-list">
-            <!-- Список деталей будет отображаться здесь -->
-        </div>
+        <div id="partsList" class="parts-list"></div>
     </div>
 
     <script>
@@ -173,50 +163,39 @@
             clearMessages(); // Очищаем сообщения
 
             const file = fileInput.files[0];
-
             if (!file) {
                 displayMessage("Пожалуйста, выберите HTML файл для обработки.", "warning");
                 return;
             }
 
-            // Проверка типа файла (не очень надежно, но лучше чем ничего)
-            if (!file.type.match('text/html')) {
-                 displayMessage("Выбранный файл не похож на HTML файл.", "warning");
-                // return; // Можно раскомментировать, если нужна строгая проверка
-            }
-
             displayMessage("Чтение файла...", "loading");
 
             const reader = new FileReader();
-
             reader.onload = (event) => {
                 const htmlContent = event.target.result;
-                clearLoadingMessage(); // Убираем сообщение о чтении
+                clearLoadingMessage();
 
                 if (!htmlContent) {
-                     displayMessage("Не удалось прочитать содержимое файла.", "error");
-                     return;
+                    displayMessage("Не удалось прочитать содержимое файла.", "error");
+                    return;
                 }
 
                 displayMessage("Анализ HTML...", "loading", true);
 
-                // Небольшая задержка для имитации обработки
-                setTimeout(() => {
-                     try {
-                        const parsedData = parseBasketHtml(htmlContent);
-                        clearLoadingMessage();
-                        displayParts(parsedData);
-                        if (parsedData.length === 0) {
-                             displayMessage("Детали в файле не найдены или структура HTML не соответствует ожидаемой.", "warning", true);
-                        } else {
-                             displayMessage(`Найдено и отображено деталей: ${parsedData.length}`, "info", true);
-                        }
-                    } catch (error) {
-                        console.error("Ошибка парсинга HTML:", error);
-                        clearLoadingMessage();
-                        displayMessage(`Ошибка при анализе HTML: ${error.message}. Возможно, файл поврежден или имеет неожиданную структуру.`, "error");
+                try {
+                    const parsedData = parseBasketHtml(htmlContent);
+                    clearLoadingMessage();
+                    displayParts(parsedData);
+                    if (parsedData.length === 0) {
+                        displayMessage("Детали в файле не найдены или структура HTML не соответствует ожидаемой.", "warning", true);
+                    } else {
+                        displayMessage(`Найдено и отображено деталей: ${parsedData.length}`, "info", true);
                     }
-                }, 100); // Уменьшим задержку
+                } catch (error) {
+                    console.error("Ошибка парсинга HTML:", error);
+                    clearLoadingMessage();
+                    displayMessage(`Ошибка при анализе HTML: ${error.message}. Проверьте файл и попробуйте снова.`, "error");
+                }
             };
 
             reader.onerror = (event) => {
@@ -225,124 +204,67 @@
                 displayMessage(`Ошибка при чтении файла: ${event.target.error.name}`, "error");
             };
 
-            // Читаем файл как текст
-            reader.readAsText(file);
+            reader.readAsText(file); // Читаем файл как текст
         });
 
         /**
-         * Парсит строку с HTML-кодом корзины и извлекает данные о товарах.
-         * @param {string} htmlString - Строка, содержащая ПОЛНЫЙ HTML-код страницы.
-         * @returns {Array<object>} Массив объектов с данными деталей { name, quantity, imageUrl }.
+         * Парсит HTML-код корзины и извлекает данные о товарах.
+         * @param {string} htmlString - HTML-код страницы.
+         * @returns {Array<object>} Массив объектов { name, quantity, imageUrl }.
          */
         function parseBasketHtml(htmlString) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlString, 'text/html');
-            // Ищем главный контейнер с товарами
-            const itemsContainer = doc.querySelector('.basket-share-detail__items'); // Ищем по классу контейнера
+            const itemsContainer = doc.querySelector('.basket-share-detail__items');
 
             if (!itemsContainer) {
-                 console.warn("Не найден контейнер '.basket-share-detail__items'. Структура страницы изменилась?");
-                 return []; // Возвращаем пустой массив, если контейнер не найден
+                console.warn("Контейнер '.basket-share-detail__items' не найден.");
+                return [];
             }
 
-            const items = itemsContainer.querySelectorAll('.basket-share-detail__item'); // Ищем товары внутри контейнера
+            const items = itemsContainer.querySelectorAll('.basket-share-detail__item');
             const partsData = [];
-            // Определяем базовый URL из сохраненного файла, если возможно, или используем стандартный
             let baseUrl = 'https://shop-device.ru';
             const baseTag = doc.querySelector('base[href]');
             if (baseTag && baseTag.href.startsWith('http')) {
-                baseUrl = baseTag.href.replace(/\/$/, ''); // Убираем слэш в конце, если есть
-                console.log(`Используем базовый URL из тега <base>: ${baseUrl}`);
-            } else {
-                // Попытка угадать из URL в комментарии "saved from url="
-                 const match = htmlString.match(/saved from url=\((.*?)\)(https://[^/]+)/);
-                 if (match && match[2]) {
-                     baseUrl = match[2];
-                     console.log(`Используем базовый URL из комментария "saved from": ${baseUrl}`);
-                 } else {
-                     console.log(`Используем стандартный базовый URL: ${baseUrl}`);
-                 }
+                baseUrl = baseTag.href.replace(/\/$/, '');
             }
 
-            console.log(`Найдено элементов для парсинга: ${items.length}`); // Лог для отладки
-
-            items.forEach((item, index) => {
-                // Селекторы для поиска данных внутри '.basket-share-detail__item'
+            items.forEach((item) => {
                 const nameElement = item.querySelector('.basket-share-detail__item__name a.dark_link');
                 const quantityElement = item.querySelector('.basket-share-detail__item__quantity');
-                const imageElement = item.querySelector('.basket-share-detail__item__image img'); // Ищем img
+                const imageElement = item.querySelector('.basket-share-detail__item__image img');
 
-                 // Извлекаем данные
-                 let name = 'Название не найдено';
-                 if (nameElement) {
-                     name = nameElement.textContent.trim();
-                 } else {
-                      console.warn(`Элемент ${index}: Не найден элемент названия.`);
-                 }
-
-                 let quantity = 0;
-                 if (quantityElement) {
-                     const quantityText = quantityElement.textContent.trim();
-                     const match = quantityText.match(/(\d+)/); // Ищем число
-                     if (match) {
-                         quantity = parseInt(match[1], 10);
-                     } else {
-                          console.warn(`Элемент ${index} (${name}): Не удалось извлечь количество из "${quantityText}".`);
-                     }
-                 } else {
-                      console.warn(`Элемент ${index} (${name}): Не найден элемент количества.`);
-                 }
-
-                let imageUrl = null;
-                if (imageElement) {
-                    // Приоритет data-src (lazyload), потом src
-                    imageUrl = imageElement.dataset.src || imageElement.getAttribute('src');
-
-                    // Обработка относительных URL (начинающихся с '/')
-                    if (imageUrl && imageUrl.startsWith('/')) {
-                        // Важно: Не добавлять двойной слэш, если baseUrl уже его имеет
-                        imageUrl = baseUrl.replace(/\/$/, '') + imageUrl;
-                    }
-                     // Обработка URL вида "Поделиться корзиной_files/..." (если файл сохранен "полностью")
-                     else if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
-                        // Это локальный путь, попробуем найти полный URL на оригинальной странице, если возможно.
-                        // Но проще всего рекомендовать сохранять "Только HTML"
-                        console.warn(`Элемент ${index} (${name}): Обнаружен относительный путь к файлу "${imageUrl}". Изображение может не загрузиться. Рекомендуется сохранять страницу как "HTML Only".`);
-                        // Попробуем найти оригинальную ссылку в data-src, если src был локальным
-                        if (imageElement.dataset.src && imageElement.dataset.src.startsWith('/')) {
-                             imageUrl = baseUrl.replace(/\/$/, '') + imageElement.dataset.src;
-                             console.log(`Элемент ${index} (${name}): Используем data-src для получения URL: ${imageUrl}`);
-                        } else {
-                             imageUrl = 'placeholder.png'; // Заглушка
-                        }
-                    }
-                } else {
-                    console.warn(`Элемент ${index} (${name}): Не найден элемент изображения.`);
-                    imageUrl = 'placeholder.png'; // Можно указать путь к картинке-заглушке
+                let name = nameElement ? nameElement.textContent.trim() : 'Название не найдено';
+                let quantity = 0;
+                if (quantityElement) {
+                    const quantityText = quantityElement.textContent.trim();
+                    const match = quantityText.match(/(\d+)/);
+                    if (match) quantity = parseInt(match[1], 10);
                 }
 
-                // Добавляем, только если есть основные данные
-                if (name !== 'Название не найдено' && quantity > 0 && imageUrl) {
+                let imageUrl = imageElement ? imageElement.getAttribute('src') : 'placeholder.png';
+                if (imageUrl && imageUrl.startsWith('/')) {
+                    imageUrl = baseUrl + imageUrl;
+                }
+
+                if (name !== 'Название не найдено' && quantity > 0) {
                     partsData.push({ name, quantity, imageUrl });
-                } else {
-                    console.warn(`Элемент ${index}: Не удалось извлечь все данные (Название: ${name}, Кол-во: ${quantity}, Картинка: ${imageUrl}). Элемент пропущен.`);
                 }
             });
 
-            console.log('Результат парсинга:', partsData); // Лог для отладки
             return partsData;
         }
 
         /**
          * Отображает список деталей на странице.
-         * (Функция осталась почти без изменений)
+         * @param {Array<object>} parts - Массив деталей.
          */
         function displayParts(parts) {
             partsListDiv.innerHTML = '<h2>Содержимое корзины из файла</h2>';
-
             if (!parts || parts.length === 0) {
-                 partsListDiv.innerHTML += '<p>Детали не найдены.</p>';
-                 return;
+                partsListDiv.innerHTML += '<p>Детали не найдены.</p>';
+                return;
             }
 
             parts.forEach(part => {
@@ -352,10 +274,10 @@
                 const img = document.createElement('img');
                 img.src = part.imageUrl;
                 img.alt = part.name.substring(0, 50);
-                img.onerror = function() {
-                    this.alt = 'Изображение недоступно';
-                    this.style.border = '1px solid red';
-                    this.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // Прозрачный пиксель
+                img.onerror = () => {
+                    img.alt = 'Изображение недоступно';
+                    img.style.border = '1px solid red';
+                    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
                 };
 
                 const infoDiv = document.createElement('div');
@@ -371,51 +293,48 @@
 
                 infoDiv.appendChild(nameP);
                 infoDiv.appendChild(quantityP);
-
                 itemDiv.appendChild(img);
                 itemDiv.appendChild(infoDiv);
-
                 partsListDiv.appendChild(itemDiv);
             });
         }
 
         /**
          * Отображает сообщение для пользователя.
-         * (Функция осталась почти без изменений)
+         * @param {string} text - Текст сообщения.
+         * @param {string} type - Тип сообщения (info, error, warning, loading).
+         * @param {boolean} append - Добавлять сообщение или заменять существующие.
          */
         function displayMessage(text, type = "info", append = false) {
-            if (!append && type !== 'loading') { // Не стираем, если добавляем или это сообщение о загрузке поверх другого
-                 clearMessages(false); // Очищаем все, кроме info
+            if (!append && type !== 'loading') {
+                clearMessages(false);
             } else if (!append) {
-                 clearMessages(true); // Очищаем все сообщения
+                clearMessages(true);
             }
 
             const messageDiv = document.createElement('div');
             messageDiv.textContent = text;
-            messageDiv.classList.add(`${type}-message`, `message-type-${type}`); // Добавляем класс для стилизации и идентификации
+            messageDiv.classList.add(`${type}-message`);
             messageArea.appendChild(messageDiv);
         }
 
-        /** Удаляет сообщения определенного типа или все */
+        /**
+         * Удаляет сообщения.
+         * @param {boolean} all - Удалить все сообщения или только не-info.
+         */
         function clearMessages(all = true) {
-            const typesToRemove = all
+            const types = all
                 ? ['.info-message', '.error-message', '.warning-message', '.loading-message']
-                : ['.error-message', '.warning-message', '.loading-message']; // Сохраняем info по умолчанию
-
-            typesToRemove.forEach(selector => {
-                const messages = messageArea.querySelectorAll(selector);
-                messages.forEach(msg => msg.remove());
+                : ['.error-message', '.warning-message', '.loading-message'];
+            types.forEach(selector => {
+                messageArea.querySelectorAll(selector).forEach(msg => msg.remove());
             });
         }
 
-         /** Удаляет только сообщения типа 'loading' */
+        /** Удаляет сообщения о загрузке */
         function clearLoadingMessage() {
-            const loadingMessages = messageArea.querySelectorAll('.message-type-loading');
-            loadingMessages.forEach(msg => msg.remove());
+            messageArea.querySelectorAll('.loading-message').forEach(msg => msg.remove());
         }
-
-
     </script>
-
 </body>
 </html>
