@@ -86,36 +86,22 @@
             border-radius: 4px;
         }
         .part-item img {
-            flex-shrink: 0; /* Предотвращает сжатие изображения */
             max-width: 60px;
             max-height: 60px;
             border: 1px solid #ddd;
             object-fit: contain;
-            /* Стили для ленивой загрузки - изображение изначально прозрачное */
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        .part-item img.loaded {
-             opacity: 1;
         }
         .part-info {
             flex-grow: 1;
-            min-width: 0; /* Помогает flexbox правильно обрабатывать перенос текста */
         }
         .part-name {
             font-weight: bold;
             color: #444;
             font-size: 0.95em;
-            word-wrap: break-word; /* Перенос длинных названий */
         }
-        .part-quantity, .part-price {
+        .part-quantity {
             color: #666;
             font-size: 0.9em;
-        }
-        .part-price {
-             font-weight: bold;
-             color: #333;
-             margin-top: 4px;
         }
         .loading-message, .error-message, .info-message, .warning-message {
             text-align: center;
@@ -161,9 +147,6 @@
                     <li>Нажмите "Выберите файл" и загрузите сохраненный HTML-файл.</li>
                     <li>Нажмите "Обработать файл".</li>
                 </ol>
-                 <div class="warning-message" style="margin-top: 10px; text-align: left;">
-                    <strong>Примечание:</strong> Отображение цен зависит от правильности CSS-селектора <code>.basket-share-detail__item__price .price_value</code>. Если цены не показываются, проверьте HTML-код сохраненной страницы и при необходимости измените селектор в скрипте этого парсера.
-                 </div>
             </div>
         </div>
         <div id="partsList" class="parts-list"></div>
@@ -174,16 +157,10 @@
         const processButton = document.getElementById('processFileButton');
         const partsListDiv = document.getElementById('partsList');
         const messageArea = document.getElementById('messageArea');
-        let imageObserver = null; // Переменная для хранения IntersectionObserver
 
         processButton.addEventListener('click', () => {
             partsListDiv.innerHTML = ''; // Очищаем предыдущий список
             clearMessages(); // Очищаем сообщения
-            // Отключаем предыдущий наблюдатель, если он был
-            if (imageObserver) {
-                imageObserver.disconnect();
-                imageObserver = null;
-            }
 
             const file = fileInput.files[0];
             if (!file) {
@@ -208,13 +185,11 @@
                 try {
                     const parsedData = parseBasketHtml(htmlContent);
                     clearLoadingMessage();
-                    displayParts(parsedData); // Отображаем структуру
-
+                    displayParts(parsedData);
                     if (parsedData.length === 0) {
                         displayMessage("Детали в файле не найдены или структура HTML не соответствует ожидаемой.", "warning", true);
                     } else {
                         displayMessage(`Найдено и отображено деталей: ${parsedData.length}`, "info", true);
-                        initializeLazyLoading(); // Запускаем ленивую загрузку ПОСЛЕ добавления элементов
                     }
                 } catch (error) {
                     console.error("Ошибка парсинга HTML:", error);
@@ -235,7 +210,7 @@
         /**
          * Парсит HTML-код корзины и извлекает данные о товарах.
          * @param {string} htmlString - HTML-код страницы.
-         * @returns {Array<object>} Массив объектов { name, quantity, imageUrl, price }.
+         * @returns {Array<object>} Массив объектов { name, quantity, imageUrl }.
          */
         function parseBasketHtml(htmlString) {
             const parser = new DOMParser();
@@ -249,39 +224,23 @@
 
             const items = itemsContainer.querySelectorAll('.basket-share-detail__item');
             const partsData = [];
+            // Определяем базовый URL. Сначала ищем тег <base>, если нет, используем shop-device.ru
             let baseUrl = 'https://shop-device.ru';
             const baseTag = doc.querySelector('base[href]');
             if (baseTag && baseTag.href && baseTag.href.startsWith('http')) {
-                baseUrl = baseTag.href.replace(/\/$/, '');
+                baseUrl = baseTag.href.replace(/\/$/, ''); // Убираем слэш в конце, если есть
                  console.log(`Using base URL from <base> tag: ${baseUrl}`);
             } else {
                  console.log(`Using default base URL: ${baseUrl}`);
             }
 
-            items.forEach((item, index) => {
+
+            items.forEach((item) => {
                 const nameElement = item.querySelector('.basket-share-detail__item__name a.dark_link');
                 const quantityElement = item.querySelector('.basket-share-detail__item__quantity');
+                // Ищем изображение внутри ссылки, которая может быть родителем img
                 const imageLink = item.querySelector('.basket-share-detail__item__image a.thumb');
-                const imageElement = imageLink ? imageLink.querySelector('img') : item.querySelector('.basket-share-detail__item__image img');
-                // --- ИЗВЛЕЧЕНИЕ ЦЕНЫ ---
-                // !!! ВНИМАНИЕ: Замените селектор ниже, если цена не находится !!!
-                const priceElement = item.querySelector('.basket-share-detail__item__price .price_value'); // Пример селектора, может потребоваться настройка
-                let price = null; // Используем null, если цена не найдена
-
-                if (priceElement) {
-                    const priceText = priceElement.textContent.trim();
-                    // Очищаем от валюты, пробелов и заменяем запятую на точку для parseFloat
-                    const cleanedPriceText = priceText.replace(/руб\.?/i, '').replace(/\s+/g, '').replace(',', '.');
-                    const parsedPrice = parseFloat(cleanedPriceText);
-                    if (!isNaN(parsedPrice)) {
-                        price = parsedPrice;
-                    } else {
-                         console.warn(`Could not parse price from text: "${priceText}" for item ${index}`);
-                    }
-                } else {
-                     console.warn(`Price element not found using selector '.basket-share-detail__item__price .price_value' for item ${index}`);
-                }
-                // --- КОНЕЦ ИЗВЛЕЧЕНИЯ ЦЕНЫ ---
+                const imageElement = imageLink ? imageLink.querySelector('img') : item.querySelector('.basket-share-detail__item__image img'); // Запасной вариант
 
                 let name = nameElement ? nameElement.textContent.trim() : 'Название не найдено';
                 let quantity = 0;
@@ -291,25 +250,28 @@
                     if (match) quantity = parseInt(match[1], 10);
                 }
 
-                let imageUrl = null; // Используем null если URL не найден
+                // --- ИЗМЕНЕННЫЙ БЛОК ДЛЯ URL ИЗОБРАЖЕНИЯ ---
+                let imageUrl = 'placeholder.png'; // Заглушка по умолчанию
                 if (imageElement) {
+                    // Приоритет отдаем data-src, если он есть, иначе берем src
                     let potentialSrc = imageElement.getAttribute('data-src') || imageElement.getAttribute('src');
-                    if (potentialSrc) {
+
+                    if (potentialSrc) { // Если нашли какой-либо источник (data-src или src)
                         if (potentialSrc.startsWith('/')) {
+                            // Если это корневой относительный путь (как в data-src), добавляем базу
                             imageUrl = baseUrl + potentialSrc;
                         } else if (potentialSrc.startsWith('http')) {
+                            // Если это уже абсолютный URL
                             imageUrl = potentialSrc;
-                        } else {
-                             console.warn(`Ignoring potential local/invalid image path: ${potentialSrc} for item ${index}`);
                         }
+                        // Игнорируем локальные пути сохранения (начинающиеся с точки или без слеша/http)
+                        // console.log(`Resolved image URL: ${imageUrl}`); // Для отладки
                     }
-                } else {
-                     console.warn(`Image element not found for item ${index}`);
                 }
-
+                // --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА ---
 
                 if (name !== 'Название не найдено' && quantity > 0) {
-                    partsData.push({ name, quantity, imageUrl, price }); // Добавляем цену в объект
+                    partsData.push({ name, quantity, imageUrl });
                 } else {
                     console.warn("Skipping item due to missing name or quantity:", item);
                 }
@@ -319,12 +281,13 @@
         }
 
         /**
-         * Отображает список деталей на странице (без загрузки изображений).
+         * Отображает список деталей на странице.
          * @param {Array<object>} parts - Массив деталей.
          */
         function displayParts(parts) {
             partsListDiv.innerHTML = '<h2>Содержимое корзины из файла</h2>';
             if (!parts || parts.length === 0) {
+                // Не добавляем сообщение здесь, оно будет добавлено из вызывающей функции
                 return;
             }
 
@@ -333,24 +296,15 @@
                 itemDiv.classList.add('part-item');
 
                 const img = document.createElement('img');
-                // Устанавливаем data-src для ленивой загрузки, src оставляем пустым или с заглушкой
-                img.dataset.src = part.imageUrl || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // Используем data-src
-                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // Заглушка
+                img.src = part.imageUrl;
                 img.alt = part.name.substring(0, 50);
-                img.classList.add('lazy-load'); // Добавляем класс для IntersectionObserver
-                img.onerror = () => {
-                    img.alt = 'Ошибка загр.';
+                img.onerror = () => { // Обработчик ошибок загрузки изображения
+                    img.alt = 'Изображение недоступно';
                     img.style.border = '1px solid red';
-                    img.classList.add('loaded'); // Показываем даже если ошибка
-                    console.warn(`Failed to load image: ${img.dataset.src}`);
-                    // Убедимся, что observer перестает наблюдать за этим элементом
-                     if (imageObserver) imageObserver.unobserve(img);
+                    // Устанавливаем прозрачный пиксель или другую заглушку
+                    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                    console.warn(`Failed to load image: ${part.imageUrl}`);
                 };
-                img.onload = () => {
-                     img.classList.add('loaded'); // Делаем видимым после загрузки
-                     // Убедимся, что observer перестает наблюдать за этим элементом
-                     if (imageObserver) imageObserver.unobserve(img);
-                }
 
                 const infoDiv = document.createElement('div');
                 infoDiv.classList.add('part-info');
@@ -365,60 +319,11 @@
 
                 infoDiv.appendChild(nameP);
                 infoDiv.appendChild(quantityP);
-
-                // Отображение цены, если она была найдена
-                if (part.price !== null) {
-                    const priceP = document.createElement('p');
-                    priceP.classList.add('part-price');
-                    // Форматируем цену (например, с 2 знаками после запятой и "руб.")
-                    priceP.textContent = `Цена: ${part.price.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-                    infoDiv.appendChild(priceP);
-                } else {
-                     const priceP = document.createElement('p');
-                     priceP.classList.add('part-price');
-                     priceP.textContent = `Цена: не найдена`;
-                     infoDiv.appendChild(priceP);
-                }
-
                 itemDiv.appendChild(img);
                 itemDiv.appendChild(infoDiv);
                 partsListDiv.appendChild(itemDiv);
             });
         }
-
-         /**
-         * Инициализирует IntersectionObserver для ленивой загрузки изображений.
-         */
-        function initializeLazyLoading() {
-            const lazyImages = partsListDiv.querySelectorAll('img.lazy-load');
-
-            if (!lazyImages.length) return; // Нечего наблюдать
-
-            // Настройки для Observer: немного заранее начинать загрузку
-            const observerOptions = {
-                root: null, // относительно viewport
-                rootMargin: '0px 0px 200px 0px', // Начать загрузку за 200px до появления снизу
-                threshold: 0.01 // Как только хотя бы 1% виден
-            };
-
-            imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        // console.log(`Loading image: ${img.dataset.src}`); // Отладка
-                        img.src = img.dataset.src; // Заменяем src на реальный URL из data-src
-                        img.classList.remove('lazy-load'); // Больше не нужно отслеживать
-                        // img.onload и img.onerror сами отключат наблюдение через unobserve
-                    }
-                });
-            }, observerOptions);
-
-            // Начинаем наблюдение за каждым изображением
-            lazyImages.forEach(img => {
-                imageObserver.observe(img);
-            });
-        }
-
 
         /**
          * Отображает сообщение для пользователя.
@@ -428,13 +333,15 @@
          */
         function displayMessage(text, type = "info", append = false) {
             if (!append && type !== 'loading') {
-                clearMessages(false);
+                clearMessages(false); // Очищаем все, кроме info и loading
             } else if (!append) {
+                 // Если не добавляем и это loading, очищаем все (включая info)
                  clearMessages(true);
             }
 
+
             const messageDiv = document.createElement('div');
-            messageDiv.innerHTML = text;
+            messageDiv.innerHTML = text; // Используем innerHTML для поддержки тегов в сообщениях (например, <strong>)
             messageDiv.classList.add(`${type}-message`);
             messageArea.appendChild(messageDiv);
         }
@@ -444,21 +351,23 @@
          * @param {boolean} all - Удалить все сообщения или только не-info и не-loading.
          */
         function clearMessages(all = true) {
-             const initialInfoMessage = messageArea.querySelector('.info-message:has(strong)'); // Находим изначальное сообщение
-             const types = ['.error-message', '.warning-message', '.loading-message'];
-             if(all) {
-                 types.push('.info-message'); // Если удаляем все, то и info тоже
-             }
-
+            const types = all
+                ? ['.info-message', '.error-message', '.warning-message', '.loading-message']
+                : ['.error-message', '.warning-message', '.loading-message']; // По умолчанию не трогаем info
             types.forEach(selector => {
                 messageArea.querySelectorAll(selector).forEach(msg => {
-                     // Не удаляем изначальное сообщение с инструкцией, если не 'all'
-                    if (msg !== initialInfoMessage || all) {
+                    // Не удаляем изначальное info сообщение с инструкцией
+                    if (!msg.querySelector('strong') || msg.querySelector('strong').textContent !== 'Как использовать:') {
                          msg.remove();
+                    } else if (all) {
+                        // Если нужно удалить все, включая инструкцию (например, при новой загрузке)
+                        // Но пока оставим инструкцию всегда видимой
+                        // msg.remove();
                     }
                 });
             });
         }
+
 
         /** Удаляет сообщения о загрузке */
         function clearLoadingMessage() {
