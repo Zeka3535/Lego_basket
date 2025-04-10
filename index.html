@@ -5,149 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог LEGO деталей (из корзины)</title>
     <style>
-        /* --- (CSS стили остаются такими же, как в предыдущем ответе) --- */
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #28a745; /* Был для экспорта, теперь можно переназначить */
-            --danger-color: #dc3545;
-            --text-color: #333;
-            --background-color: #f4f4f4;
-            --lego-red: #d81e2b;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px;
-            color: var(--text-color); line-height: 1.6; background-color: var(--background-color);
-        }
-        .container {
-            width: 85%; max-width: 1200px; margin: 20px auto; padding: 30px;
-            background-color: #fff; border-radius: 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
+        /* --- CSS без изменений --- */
+        :root { --primary-color: #007bff; --secondary-color: #28a745; --danger-color: #dc3545; --text-color: #333; --background-color: #f4f4f4; --lego-red: #d81e2b; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; color: var(--text-color); line-height: 1.6; background-color: var(--background-color); }
+        .container { width: 85%; max-width: 1200px; margin: 20px auto; padding: 30px; background-color: #fff; border-radius: 12px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); }
         .logo-and-input { display: flex; align-items: center; margin-bottom: 25px; gap: 20px; }
         h1 { text-align: left; margin: 0; flex-shrink: 0; }
         h1 img { width: 100px; height: auto; transition: transform 0.3s ease; vertical-align: middle; }
         h1:hover img { transform: scale(1.1); }
-        .file-input-area {
-            display: flex; align-items: center; gap: 10px; border: 1px solid #ccc;
-            border-radius: 8px; padding: 10px 15px; flex-grow: 1; background-color: #f9f9f9;
-        }
-        #file-info {
-            font-style: italic; color: #555; overflow: hidden; text-overflow: ellipsis;
-            white-space: nowrap; flex-grow: 1;
-        }
-        #button-container {
-            text-align: center; margin-bottom: 25px; display: flex; justify-content: center;
-            gap: 10px; flex-wrap: wrap;
-        }
-        .button {
-            padding: 12px 25px; border-radius: 8px; font-size: 1rem; border: none;
-            cursor: pointer; background-color: var(--primary-color); color: #fff;
-            transition: background-color 0.2s ease, transform 0.2s ease; flex-shrink: 0;
-        }
+        .file-input-area { display: flex; align-items: center; gap: 10px; border: 1px solid #ccc; border-radius: 8px; padding: 10px 15px; flex-grow: 1; background-color: #f9f9f9; }
+        #file-info { font-style: italic; color: #555; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; }
+        #button-container { text-align: center; margin-bottom: 25px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .button { padding: 12px 25px; border-radius: 8px; font-size: 1rem; border: none; cursor: pointer; background-color: var(--primary-color); color: #fff; transition: background-color 0.2s ease, transform 0.2s ease; flex-shrink: 0; }
         .button:hover { transform: scale(1.03); }
         .button:focus { outline: 2px solid var(--primary-color); outline-offset: 2px; }
         #load-file-button { background-color: var(--primary-color); }
         #load-file-button:hover { background-color: #0056b3;}
         #clear-button { background-color: var(--danger-color); }
         #clear-button:hover { background-color: #c82333; }
-        /* --- Инструкция --- */
-        .instructions {
-            background-color: #eef; border: 1px solid #ccd; border-radius: 8px;
-            padding: 15px; margin-bottom: 20px; font-size: 0.95rem;
-        }
+        .instructions { background-color: #eef; border: 1px solid #ccd; border-radius: 8px; padding: 15px; margin-bottom: 20px; font-size: 0.95rem; }
         .instructions summary { font-weight: bold; cursor: pointer; }
         .instructions ol { margin-top: 10px; padding-left: 20px; }
         .instructions code { background: #ddd; padding: 2px 4px; border-radius: 3px; }
-        /* --- Сообщения --- */
-        #error-message, #info-message {
-            text-align: center; display: none; margin-bottom: 15px; padding: 10px;
-            border-radius: 6px; border: 1px solid;
-        }
+        #error-message, #info-message { text-align: center; display: none; margin-bottom: 15px; padding: 10px; border-radius: 6px; border: 1px solid; }
         #error-message { color: var(--danger-color); background-color: #f8d7da; border-color: #f5c6cb; }
         #info-message { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; }
-        /* --- Итоги --- */
-        #total-parts-container {
-            text-align: right; margin-bottom: 15px; font-weight: 600;
-            font-size: 1.1rem; color: #555;
-        }
+        #total-parts-container { text-align: right; margin-bottom: 15px; font-weight: 600; font-size: 1.1rem; color: #555; }
         #total-parts-container img { width: 20px; height: auto; vertical-align: middle; margin-right: 5px; opacity: 0.8; }
-        /* --- Таблица --- */
-        table {
-            width: 100%; border-collapse: collapse; margin-bottom: 30px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px;
-            overflow: hidden; background-color: #fff;
-        }
-        th, td {
-            border: 1px solid #ddd; padding: 12px 15px; text-align: left;
-            font-size: 0.95rem; vertical-align: middle;
-        }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden; background-color: #fff; }
+        th, td { border: 1px solid #ddd; padding: 12px 15px; text-align: left; font-size: 0.95rem; vertical-align: middle; }
         td:nth-child(1), th:nth-child(1) { text-align: center; width: 5%; } /* № */
-        td:nth-child(2) { word-break: break-word; width: 35%;} /* Наименование */
+        td:nth-child(2) { word-break: break-word; width: 37%;} /* Наименование */
         td:nth-child(3), th:nth-child(3) { text-align: center; width: 10%; } /* Фото */
-        td:nth-child(4), th:nth-child(4) { text-align: center; width: 10%; } /* Кол-во */
+        td:nth-child(4), th:nth-child(4) { text-align: center; width: 8%; } /* Количество */
         td:nth-child(5), th:nth-child(5) { width: 15%; } /* Цвет */
         td:nth-child(6), th:nth-child(6) { width: 10%; } /* Состояние */
         td:nth-child(7), th:nth-child(7) { width: 15%; } /* Тип */
-        th {
-            background-color: #f7f7f7; font-weight: 600; color: #555; cursor: default;
-            transition: background-color 0.2s ease; position: relative;
-        }
+        th { background-color: #f7f7f7; font-weight: 600; color: #555; cursor: default; transition: background-color 0.2s ease; position: relative; }
         th[data-sortable="true"] { cursor: pointer; }
         th[data-sortable="true"]:hover { background-color: #eee; }
-        th::after {
-            content: ''; position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-            width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent;
-            opacity: 0.3; transition: opacity 0.2s;
-        }
+        th::after { content: ''; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; opacity: 0.3; transition: opacity 0.2s; }
         th.sort-asc::after { border-bottom: 5px solid #555; opacity: 1; }
         th.sort-desc::after { border-top: 5px solid #555; opacity: 1; }
         tbody tr:nth-child(even) { background-color: #fcfcfc; }
         tbody tr:hover { background-color: #f0f8ff; }
-        .filter-column {
-            display: block; width: 95%; margin-top: 5px; padding: 6px 8px;
-            border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;
-            background-color: #fff; color: var(--text-color); cursor: pointer; appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 6 5-6H1z' fill='%23555'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 8px center; padding-right: 25px;
-        }
+        .filter-column { display: block; width: 95%; margin-top: 5px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; background-color: #fff; color: var(--text-color); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 6 5-6H1z' fill='%23555'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 25px; }
         .filter-column:focus { outline: 2px solid var(--primary-color); outline-offset: 1px; }
-        .part-image {
-            max-width: 50px; max-height: 50px; vertical-align: middle; border-radius: 4px;
-            background-color: #f0f0f0; display: inline-block;
+        .part-image { max-width: 50px; max-height: 50px; vertical-align: middle; border-radius: 4px; background-color: #f0f0f0; display: inline-block; }
+        .part-image-placeholder { width: 50px; height: 50px; display: inline-block; line-height: 50px; text-align: center; color: #999; font-size: 0.8rem; background-color: #f0f0f0; border-radius: 4px; }
+        .color-swatch { width: 18px; height: 18px; border-radius: 4px; display: inline-block; margin-right: 6px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.4); background-color: #eee; }
+        .filter-option-content { display: flex; align-items: center; } /* Для содержимого опции с иконкой */
+        /* Префикс типа детали в списке */
+        .type-prefix {
+            display: inline-block;
+            min-width: 3.5em; /* Минимальная ширина для выравнивания */
+            margin-right: 4px;
+            color: #777;
+            font-family: monospace;
+            font-size: 0.9em;
         }
-        .part-image-placeholder {
-            width: 50px; height: 50px; display: inline-block; line-height: 50px;
-            text-align: center; color: #999; font-size: 0.8rem;
-            background-color: #f0f0f0; border-radius: 4px;
-        }
-        .color-swatch {
-            width: 18px; height: 18px; border-radius: 4px; display: inline-block;
-            margin-right: 6px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.4);
-            background-color: #eee;
-        }
-        .filter-option-content { display: flex; align-items: center; }
         tfoot tr.total-row { font-weight: 600; background-color: #f1f1f1; border-top: 2px solid #ccc; }
         tfoot td { text-align: right; }
         tfoot td:first-child { text-align: left; }
         tfoot #total-quantity-cell { text-align: center; }
-        /* --- Адаптивность (без изменений) --- */
-        @media (max-width: 768px) {
-            .container { width: 98%; padding: 15px; }
-            .logo-and-input { flex-direction: column; align-items: stretch; }
-            h1 { text-align: center; margin-bottom: 15px;}
-            .file-input-area { flex-direction: column; align-items: stretch; }
-            #file-info { text-align: center; margin-top: 5px;}
-            #button-container { flex-direction: column; gap: 8px; }
-            th, td { font-size: 0.85rem; padding: 8px 10px; }
-            .part-image { max-width: 40px; max-height: 40px; }
-            .part-image-placeholder { width: 40px; height: 40px; line-height: 40px; }
-            .color-swatch { width: 15px; height: 15px; }
-            .filter-column { width: 100%; box-sizing: border-box; }
-        }
-        @media (max-width: 480px) {
-             th, td { font-size: 0.75rem; padding: 6px 8px; }
-             .part-image, .part-image-placeholder { display: none; }
-             td:nth-child(3), th:nth-child(3) { display: none; }
-        }
+        @media (max-width: 768px) { .container { width: 98%; padding: 15px; } .logo-and-input { flex-direction: column; align-items: stretch; } h1 { text-align: center; margin-bottom: 15px;} .file-input-area { flex-direction: column; align-items: stretch; } #file-info { text-align: center; margin-top: 5px;} #button-container { flex-direction: column; gap: 8px; } th, td { font-size: 0.85rem; padding: 8px 10px; } .part-image { max-width: 40px; max-height: 40px; } .part-image-placeholder { width: 40px; height: 40px; line-height: 40px; } .color-swatch { width: 15px; height: 15px; } .filter-column { width: 100%; box-sizing: border-box; } }
+        @media (max-width: 480px) { th, td { font-size: 0.75rem; padding: 6px 8px; } .part-image, .part-image-placeholder { display: none; } td:nth-child(3), th:nth-child(3) { display: none; } }
     </style>
 </head>
 <body>
@@ -162,7 +84,7 @@
         </div>
 
         <!-- Инструкция -->
-        <details class="instructions">
+        <details class="instructions" open>
             <summary>Как сохранить и загрузить файл корзины?</summary>
             <ol>
                 <li>Откройте страницу с общей корзиной в вашем браузере (например, <code>https://shop-device.ru/sharebasket/...</code>).</li>
@@ -178,7 +100,6 @@
         <div id="button-container">
             <button id="load-file-button" class="button" aria-label="Загрузить HTML файл корзины">Загрузить HTML</button>
             <button id="clear-button" class="button" aria-label="Очистить таблицу и выбор файла">Очистить</button>
-            <!-- Кнопка Экспорт убрана -->
         </div>
 
         <!-- Сообщения -->
@@ -234,7 +155,6 @@
             const htmlFileInput = document.getElementById('htmlFileInput');
             const loadFileButton = document.getElementById('load-file-button');
             const fileInfoSpan = document.getElementById('file-info');
-            // exportButton убран
             const clearButton = document.getElementById('clear-button');
             const table = document.getElementById('lego-table');
             const tableBody = table.querySelector('tbody');
@@ -249,217 +169,93 @@
             let currentFilters = { color: 'all', condition: 'all', type: 'all' };
             let currentSort = { field: 'number', direction: 'asc' };
 
-            // --- Color Definitions (Оставляем как есть) ---
-            const LEGO_COLORS_RU = [ /* ... */ 'бежевый', 'белый', 'голубой', 'жёлтый', 'желтый', 'зелёный', 'зеленый', 'коричневый', 'красный', 'оранжевый', 'розовый', 'салатовый', 'серый', 'синий', 'фиолетовый', 'чёрный', 'черный', 'прозрачный', 'золотой', 'серебряный', 'темно-серый', 'светло-серый', 'темно-синий', 'светло-голубой', 'темно-зеленый', 'ярко-зеленый', 'песочный', 'лаванда', 'пурпурный', 'лайм', 'аква', 'малиновый', 'бирюзовый'];
-            const LEGO_COLORS_EN = [ /* ... */ "dark bluish gray", "light bluish gray", "bright light blue", "bright light orange", "bright light yellow", "dark pearl gray", "pearl dark gray", "pearl light gray", "pearl sand blue", "speckle black-silver", "trans-bright green", "trans-dark blue", "trans-dark pink", "trans-light blue", "trans-medium blue", "trans-neon green", "trans-neon orange", "medium lavender", "medium nougat", "yellowish green", "chrome gold", "chrome silver", "dark azure", "dark green", "dark orange", "dark pink", "dark purple", "dark red", "dark tan", "dark turquoise", "flat silver", "light gray", "medium azure", "medium blue", "metallic silver", "olive green", "pearl gold", "sand blue", "sand green", "trans-black", "trans-clear", "trans-green", "trans-orange", "trans-purple", "trans-red", "trans-yellow", "bright green", "bright pink", "dark blue", "dark gray", "light blue", "magenta", "orange", "purple", "silver", "yellow", "black", "blue", "brown", "green", "lime", "pink", "red", "tan", "white", "gold", "copper"].sort((a, b) => b.length - a.length);
-            const COLOR_MAP = { /* ... оставляем COLOR_MAP ... */ 'белый': '#FFFFFF', 'черный': '#05131D', 'чёрный': '#05131D', 'серый': '#9BA19D', 'темно-серый': '#6D6E5C', 'светло-серый': '#A0A5A9', 'синий': '#0055BF', 'темно-синий': '#0A3463', 'голубой': '#55A5AF', 'светло-голубой': '#B4D2E3', 'зелёный': '#237841', 'зеленый': '#237841', 'лайм': '#9BCA3E', 'салатовый': '#9BCA3E', 'темно-зеленый': '#184632', 'жёлтый': '#F2CD37', 'желтый': '#F2CD37', 'оранжевый': '#FE8A18', 'красный': '#C91A09', 'коричневый': '#583927', 'бежевый': '#E4CD9E', 'песочный': '#E4CD9E', 'розовый': '#FC97AC', 'фиолетовый': '#81007B', 'пурпурный': '#4B0082', 'лаванда': '#AC78BA', 'прозрачный': 'rgba(220,220,230,0.5)', 'золотой': '#BBA53D', 'серебряный': '#898788', 'white': '#FFFFFF', 'black': '#05131D', 'light gray': '#9BA19D', 'dark gray': '#6D6E5C', 'light bluish gray': '#A0A5A9', 'dark bluish gray': '#6C6E68', 'blue': '#0055BF', 'dark blue': '#0A3463', 'medium blue': '#5C9DD1', 'light blue': '#B4D2E3', 'bright light blue': '#B4D2E3', 'green': '#237841', 'dark green': '#184632', 'bright green': '#4B9F4A', 'lime': '#9BCA3E', 'yellow': '#F2CD37', 'bright light yellow': '#FFF03A', 'orange': '#FE8A18', 'bright light orange': '#F8BB3D', 'red': '#C91A09', 'dark red': '#720E0F', 'brown': '#583927', 'dark brown': '#352100', 'tan': '#E4CD9E', 'dark tan': '#958A73', 'pink': '#FC97AC', 'bright pink': '#E4ADC8', 'purple': '#81007B', 'dark purple': '#3F3691', 'magenta': '#923978', 'lavender': '#AC78BA', 'medium lavender': '#AC78BA', 'trans-clear': 'rgba(240,240,240,0.7)', 'trans-black': 'rgba(99, 95, 97, 0.7)', 'trans-red': 'rgba(200, 40, 40, 0.7)', 'trans-dark-blue': 'rgba(0, 80, 150, 0.7)', 'trans-light-blue': 'rgba(170, 200, 220, 0.7)', 'gold': '#BBA53D', 'pearl gold': '#AA9535', 'silver': '#898788', 'flat silver': '#898788', 'metallic silver': '#A0A1A4', 'pearl light gray': '#A0A5A9', 'dark pearl gray': '#575857', 'chrome gold': '#E0B02E', 'chrome silver': '#C0C0C0', 'n/a': '#CCCCCC' };
+            // --- Color Definitions & Type Keywords ---
+            const LEGO_COLORS_RU = [ 'бежевый', 'белый', 'голубой', 'жёлтый', 'желтый', 'зелёный', 'зеленый', 'коричневый', 'красный', 'оранжевый', 'розовый', 'салатовый', 'серый', 'синий', 'фиолетовый', 'чёрный', 'черный', 'прозрачный', 'золотой', 'серебряный', 'темно-серый', 'светло-серый', 'темно-синий', 'светло-голубой', 'темно-зеленый', 'ярко-зеленый', 'песочный', 'лаванда', 'пурпурный', 'лайм', 'аква', 'малиновый', 'бирюзовый'];
+            const LEGO_COLORS_EN = [ "dark bluish gray", "light bluish gray", "bright light blue", "bright light orange", "bright light yellow", "dark pearl gray", "pearl dark gray", "pearl light gray", "pearl sand blue", "speckle black-silver", "trans-bright green", "trans-dark blue", "trans-dark pink", "trans-light blue", "trans-medium blue", "trans-neon green", "trans-neon orange", "medium lavender", "medium nougat", "yellowish green", "chrome gold", "chrome silver", "dark azure", "dark green", "dark orange", "dark pink", "dark purple", "dark red", "dark tan", "dark turquoise", "flat silver", "light gray", "medium azure", "medium blue", "metallic silver", "olive green", "pearl gold", "sand blue", "sand green", "trans-black", "trans-clear", "trans-green", "trans-orange", "trans-purple", "trans-red", "trans-yellow", "bright green", "bright pink", "dark blue", "dark gray", "light blue", "magenta", "orange", "purple", "silver", "yellow", "black", "blue", "brown", "green", "lime", "pink", "red", "tan", "white", "gold", "copper"].sort((a, b) => b.length - a.length);
+            const COLOR_MAP = { 'белый': '#FFFFFF', 'черный': '#05131D', 'чёрный': '#05131D', 'серый': '#9BA19D', 'темно-серый': '#6D6E5C', 'светло-серый': '#A0A5A9', 'синий': '#0055BF', 'темно-синий': '#0A3463', 'голубой': '#55A5AF', 'светло-голубой': '#B4D2E3', 'зелёный': '#237841', 'зеленый': '#237841', 'лайм': '#9BCA3E', 'салатовый': '#9BCA3E', 'темно-зеленый': '#184632', 'жёлтый': '#F2CD37', 'желтый': '#F2CD37', 'оранжевый': '#FE8A18', 'красный': '#C91A09', 'коричневый': '#583927', 'бежевый': '#E4CD9E', 'песочный': '#E4CD9E', 'розовый': '#FC97AC', 'фиолетовый': '#81007B', 'пурпурный': '#4B0082', 'лаванда': '#AC78BA', 'прозрачный': 'rgba(220,220,230,0.5)', 'золотой': '#BBA53D', 'серебряный': '#898788', 'white': '#FFFFFF', 'black': '#05131D', 'light gray': '#9BA19D', 'dark gray': '#6D6E5C', 'light bluish gray': '#A0A5A9', 'dark bluish gray': '#6C6E68', 'blue': '#0055BF', 'dark blue': '#0A3463', 'medium blue': '#5C9DD1', 'light blue': '#B4D2E3', 'bright light blue': '#B4D2E3', 'green': '#237841', 'dark green': '#184632', 'bright green': '#4B9F4A', 'lime': '#9BCA3E', 'yellow': '#F2CD37', 'bright light yellow': '#FFF03A', 'orange': '#FE8A18', 'bright light orange': '#F8BB3D', 'red': '#C91A09', 'dark red': '#720E0F', 'brown': '#583927', 'dark brown': '#352100', 'tan': '#E4CD9E', 'dark tan': '#958A73', 'pink': '#FC97AC', 'bright pink': '#E4ADC8', 'purple': '#81007B', 'dark purple': '#3F3691', 'magenta': '#923978', 'lavender': '#AC78BA', 'medium lavender': '#AC78BA', 'trans-clear': 'rgba(240,240,240,0.7)', 'trans-black': 'rgba(99, 95, 97, 0.7)', 'trans-red': 'rgba(200, 40, 40, 0.7)', 'trans-dark-blue': 'rgba(0, 80, 150, 0.7)', 'trans-light-blue': 'rgba(170, 200, 220, 0.7)', 'gold': '#BBA53D', 'pearl gold': '#AA9535', 'silver': '#898788', 'flat silver': '#898788', 'metallic silver': '#A0A1A4', 'pearl light gray': '#A0A5A9', 'dark pearl gray': '#575857', 'chrome gold': '#E0B02E', 'chrome silver': '#C0C0C0', 'n/a': '#CCCCCC' };
+            const TYPE_KEYWORDS = { 'plate modified': 'Пластины (мод.)', 'plate': 'Пластины', 'brick modified': 'Кирпичи (мод.)', 'brick arch': 'Кирпичи (арки)', 'brick round': 'Кирпичи (круглые)', 'brick': 'Кирпичи', 'tile modified': 'Плитки (мод.)', 'tile round': 'Плитки (круглые)', 'tile': 'Плитки', 'slope inverted': 'Скосы (инверт.)', 'slope curved': 'Скосы (изогнутые)', 'slope': 'Скосы', 'wedge plate': 'Клинья (пластины)', 'wedge': 'Клинья', 'panel': 'Панели', 'window': 'Окна/Двери', 'door': 'Окна/Двери', 'glass': 'Окна/Двери (стекло)', 'technic brick': 'Technic Кирпичи', 'technic pin': 'Technic Пины/Оси', 'technic axle': 'Technic Пины/Оси', 'technic connector': 'Technic Коннекторы', 'technic gear': 'Technic Шестерни', 'technic beam': 'Technic Балки', 'technic liftarm': 'Technic Балки', 'technic': 'Technic', 'bar': 'Стержни/Решетки', 'fence': 'Стержни/Решетки', 'ladder': 'Стержни/Решетки', 'clip': 'Клипсы/Зажимы', 'hinge': 'Шарниры/Петли', 'cone': 'Конусы/Цилиндры', 'cylinder': 'Конусы/Цилиндры', 'minifigure': 'Минифигурки/Аксессуары', 'minifig': 'Минифигурки/Аксессуары', 'weapon': 'Минифигурки/Аксессуары', 'utensil': 'Минифигурки/Аксессуары', 'head': 'Минифигурки/Аксессуары', 'hair': 'Минифигурки/Аксессуары', 'torso': 'Минифигурки/Аксессуары', 'legs': 'Минифигурки/Аксессуары', 'helmet': 'Минифигурки/Аксессуары', 'wheel': 'Колеса/Шины', 'tire': 'Колеса/Шины', 'container': 'Контейнеры', 'box': 'Контейнеры', 'animal': 'Животные/Растения', 'plant': 'Животные/Растения', 'flower': 'Животные/Растения', 'пластина': 'Пластины', 'кирпич': 'Кирпичи', 'кубик': 'Кирпичи', 'плитка': 'Плитки', 'скос': 'Скосы', 'панель': 'Панели', 'решетка': 'Стержни/Решетки', 'зажим': 'Клипсы/Зажимы', 'ось': 'Technic Пины/Оси', 'балка': 'Technic Балки', 'шестерня': 'Technic Шестерни', 'колесо': 'Колеса/Шины', 'шина': 'Колеса/Шины', 'растение': 'Животные/Растения', 'цветок': 'Животные/Растения' };
+            const SORTED_TYPE_KEYS = Object.keys(TYPE_KEYWORDS).sort((a, b) => b.length - a.length);
 
-            // --- Type Extraction Keywords ---
-            const TYPE_KEYWORDS = {
-                // English (prioritize longer/more specific)
-                'plate modified': 'Пластины (мод.)', 'plate': 'Пластины',
-                'brick modified': 'Кирпичи (мод.)', 'brick arch': 'Кирпичи (арки)', 'brick round': 'Кирпичи (круглые)', 'brick': 'Кирпичи',
-                'tile modified': 'Плитки (мод.)', 'tile round': 'Плитки (круглые)', 'tile': 'Плитки',
-                'slope inverted': 'Скосы (инверт.)', 'slope curved': 'Скосы (изогнутые)', 'slope': 'Скосы',
-                'wedge plate': 'Клинья (пластины)', 'wedge': 'Клинья',
-                'panel': 'Панели', 'window': 'Окна/Двери', 'door': 'Окна/Двери', 'glass': 'Окна/Двери (стекло)',
-                'technic brick': 'Technic Кирпичи', 'technic pin': 'Technic Пины/Оси', 'technic axle': 'Technic Пины/Оси',
-                'technic connector': 'Technic Коннекторы', 'technic gear': 'Technic Шестерни', 'technic beam': 'Technic Балки',
-                'technic liftarm': 'Technic Балки', 'technic': 'Technic', // Общее Technic
-                'bar': 'Стержни/Решетки', 'fence': 'Стержни/Решетки', 'ladder': 'Стержни/Решетки',
-                'clip': 'Клипсы/Зажимы', 'hinge': 'Шарниры/Петли',
-                'cone': 'Конусы/Цилиндры', 'cylinder': 'Конусы/Цилиндры',
-                'minifigure': 'Минифигурки/Аксессуары', 'minifig': 'Минифигурки/Аксессуары', 'weapon': 'Минифигурки/Аксессуары',
-                'utensil': 'Минифигурки/Аксессуары', 'head': 'Минифигурки/Аксессуары', 'hair': 'Минифигурки/Аксессуары', 'torso': 'Минифигурки/Аксессуары',
-                'legs': 'Минифигурки/Аксессуары', 'helmet': 'Минифигурки/Аксессуары',
-                'wheel': 'Колеса/Шины', 'tire': 'Колеса/Шины',
-                'container': 'Контейнеры', 'box': 'Контейнеры',
-                'animal': 'Животные/Растения', 'plant': 'Животные/Растения', 'flower': 'Животные/Растения',
-                // Russian (дополнить при необходимости)
-                'пластина': 'Пластины', 'кирпич': 'Кирпичи', 'кубик': 'Кирпичи', 'плитка': 'Плитки',
-                'скос': 'Скосы', 'панель': 'Панели', 'решетка': 'Стержни/Решетки', 'зажим': 'Клипсы/Зажимы',
-                'ось': 'Technic Пины/Оси', 'балка': 'Technic Балки', 'шестерня': 'Technic Шестерни',
-                'колесо': 'Колеса/Шины', 'шина': 'Колеса/Шины',
-                'растение': 'Животные/Растения', 'цветок': 'Животные/Растения'
-            };
-             // Сортируем ключи от длинных к коротким для правильного поиска
-             const SORTED_TYPE_KEYS = Object.keys(TYPE_KEYWORDS).sort((a, b) => b.length - a.length);
+             // ** NEW: Map Part Type to a short Prefix for dropdown **
+             const TYPE_PREFIX_MAP = {
+                 'Пластины': '[PLT]', 'Пластины (мод.)': '[PLT+]',
+                 'Кирпичи': '[BRK]', 'Кирпичи (мод.)': '[BRK+]', 'Кирпичи (арки)': '[ARC]', 'Кирпичи (круглые)': '[RND]',
+                 'Плитки': '[TLE]', 'Плитки (мод.)': '[TLE+]', 'Плитки (круглые)': '[RND]',
+                 'Скосы': '[SLP]', 'Скосы (инверт.)': '[SLP-]', 'Скосы (изогнутые)': '[SLP~]',
+                 'Клинья': '[WDG]', 'Клинья (пластины)': '[WDG~]',
+                 'Панели': '[PNL]',
+                 'Окна/Двери': '[WIN]', 'Окна/Двери (стекло)': '[GLS]',
+                 'Technic': '[TCH]', 'Technic Кирпичи': '[TCH B]', 'Technic Пины/Оси': '[TCH P]', 'Technic Коннекторы': '[TCH C]', 'Technic Шестерни': '[TCH G]', 'Technic Балки': '[TCH L]',
+                 'Стержни/Решетки': '[BAR]',
+                 'Клипсы/Зажимы': '[CLP]', 'Шарниры/Петли': '[HNG]',
+                 'Конусы/Цилиндры': '[CON]',
+                 'Минифигурки/Аксессуары': '[FIG]',
+                 'Колеса/Шины': '[WHL]',
+                 'Контейнеры': '[BOX]',
+                 'Животные/Растения': '[BIO]',
+                 'Другое': '[OTH]',
+                 'N/A': '[N/A]'
+             };
 
 
             // --- Functions ---
-
-            const showMessage = (msg, type = 'error') => { /* ... (без изменений) ... */ const div = type === 'error' ? errorMessageDiv : infoMessageDiv; const otherDiv = type === 'error' ? infoMessageDiv : errorMessageDiv; div.textContent = msg; div.style.display = 'block'; otherDiv.style.display = 'none'; setTimeout(() => { div.style.display = 'none'; }, 5000); };
-            const clearMessages = () => { /* ... (без изменений) ... */ errorMessageDiv.style.display = 'none'; infoMessageDiv.style.display = 'none'; };
-            function getCssColor(colorName) { /* ... (без изменений) ... */ return COLOR_MAP[colorName.toLowerCase()] || '#CCCCCC'; }
-            const debounce = (func, wait) => { /* ... (без изменений) ... */ let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); }; };
-            const getColumnIndex = (column) => { /* ... (без изменений) ... */ const headers = table.querySelectorAll('thead th'); for (let i = 0; i < headers.length; i++) { if (headers[i].dataset.sort === column) return i; } return -1; };
-
-             /** Extracts color name (без изменений) */
+            const showMessage = (msg, type = 'error') => { const div = type === 'error' ? errorMessageDiv : infoMessageDiv; const otherDiv = type === 'error' ? infoMessageDiv : errorMessageDiv; div.textContent = msg; div.style.display = 'block'; otherDiv.style.display = 'none'; setTimeout(() => { div.style.display = 'none'; }, 5000); };
+            const clearMessages = () => { errorMessageDiv.style.display = 'none'; infoMessageDiv.style.display = 'none'; };
+            function getCssColor(colorName) { return COLOR_MAP[colorName.toLowerCase()] || '#CCCCCC'; }
+            const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); }; };
+            const getColumnIndex = (column) => { const headers = table.querySelectorAll('thead th'); for (let i = 0; i < headers.length; i++) { if (headers[i].dataset.sort === column) return i; } return -1; };
             function extractColorFromName(name) { const lowerName = name.toLowerCase(); let foundColor = null; let sourceText = ''; const matchInParentheses = lowerName.match(/\(([^)]+)\)/); if (matchInParentheses && matchInParentheses[1]) { sourceText = matchInParentheses[1].trim(); foundColor = LEGO_COLORS_RU.find(color => sourceText.includes(color)); if (foundColor) return foundColor.charAt(0).toUpperCase() + foundColor.slice(1); } const lastParenthesisIndex = lowerName.lastIndexOf(')'); if (lastParenthesisIndex !== -1) { sourceText = name.substring(lastParenthesisIndex + 1).trim().replace(/(\s+[a-zA-Z0-9])$/, '').trim(); const lowerSourceText = sourceText.toLowerCase(); if (lowerSourceText) { foundColor = LEGO_COLORS_EN.find(color => lowerSourceText.includes(color.toLowerCase())); if (foundColor) { const regex = new RegExp(`\\b${foundColor.replace(/[-\s]/g, '[-\\s]')}\\b`, 'i'); if (regex.test(sourceText)) return foundColor.charAt(0).toUpperCase() + foundColor.slice(1); } } } sourceText = name.trim().replace(/(\s+[a-zA-Z0-9])$/, '').trim(); const lowerSourceText = sourceText.toLowerCase(); foundColor = LEGO_COLORS_EN.find(color => lowerSourceText.endsWith(color.toLowerCase())); if (foundColor) return foundColor.charAt(0).toUpperCase() + foundColor.slice(1); return 'N/A'; }
-
-            /** **NEW**: Extracts condition (N/U) */
-            function extractConditionFromName(name) {
-                // Ищем ' U' или ' N' в самом конце строки (после пробела)
-                if (/\sU$/.test(name)) return 'Б/У';
-                if (/\sN$/.test(name)) return 'Новая';
-                // Можно добавить проверки на (used) / (new) если такие есть
-                // if (/\(used\)$/i.test(name)) return 'Б/У';
-                // if (/\(new\)$/i.test(name)) return 'Новая';
-                return 'Неизвестно'; // Если не найдено
-            }
-
-             /** **NEW**: Extracts part type */
-            function extractPartType(name) {
-                // Сначала очистим имя от цвета, состояния, номера в скобках для лучшего поиска типа
-                let cleanName = name.replace(/\(([^)]+)\)/g, ''); // Удаляем скобки с содержимым
-                cleanName = cleanName.replace(/\s(U|N)$/, ''); // Удаляем состояние в конце
-                // Попытка удалить найденный цвет (не идеально, но может помочь)
-                 const detectedColor = extractColorFromName(name);
-                 if (detectedColor !== 'N/A') {
-                    // Удаляем и английское и русское название цвета, если они есть
-                    const colorEn = Object.keys(COLOR_MAP).find(key => COLOR_MAP[key] === getCssColor(detectedColor) && /^[a-z\s-]+$/.test(key)); // EN key
-                    const colorRu = Object.keys(COLOR_MAP).find(key => COLOR_MAP[key] === getCssColor(detectedColor) && /^[а-яё\s-]+$/.test(key)); // RU key
-                     if(colorEn) cleanName = cleanName.replace(new RegExp(`\\b${colorEn}\\b`, 'gi'), '');
-                     if(colorRu) cleanName = cleanName.replace(new RegExp(`\\b${colorRu}\\b`, 'gi'), '');
-                     cleanName = cleanName.replace(new RegExp(`\\b${detectedColor}\\b`, 'gi'), ''); // И само название
-                 }
-                 cleanName = cleanName.toLowerCase().trim();
-
-                // Ищем по ключевым словам от длинных к коротким
-                 for (const keyword of SORTED_TYPE_KEYS) {
-                     if (cleanName.includes(keyword)) {
-                         return TYPE_KEYWORDS[keyword];
-                     }
-                 }
-                 return 'Другое'; // Если ничего не подошло
-             }
-
-             /** Parses the HTML content (Updated) */
-            function parseBasketHtml(htmlString) {
-                 const parser = new DOMParser(); const doc = parser.parseFromString(htmlString, 'text/html');
-                 const itemsContainer = doc.querySelector('.basket-share-detail__items');
-                 if (!itemsContainer) throw new Error("Не найден контейнер деталей ('.basket-share-detail__items').");
-                 const items = itemsContainer.querySelectorAll('.basket-share-detail__item');
-                 if (items.length === 0) { showMessage("В файле не найдено элементов корзины ('.basket-share-detail__item').", 'warning'); return []; }
-
-                 const partsData = []; let baseUrl = 'https://shop-device.ru';
-                 const baseTag = doc.querySelector('base[href]');
-                 if (baseTag?.href?.startsWith('http')) baseUrl = baseTag.href.replace(/\/$/, '');
-
-                 items.forEach((item) => {
-                     const nameElement = item.querySelector('.basket-share-detail__item__name a.dark_link');
-                     const quantityElement = item.querySelector('.basket-share-detail__item__quantity');
-                     const imageElement = item.querySelector('.basket-share-detail__item__image img');
-
-                     let name = nameElement?.textContent.trim() ?? 'Название не найдено';
-                     let quantity = parseInt(quantityElement?.textContent.match(/(\d+)/)?.[1] ?? '0', 10);
-                     let imageUrl = null;
-                     if (imageElement) {
-                         let potentialSrc = imageElement.getAttribute('data-src') || imageElement.getAttribute('src');
-                         if (potentialSrc?.startsWith('/')) imageUrl = baseUrl + potentialSrc;
-                         else if (potentialSrc?.startsWith('http')) imageUrl = potentialSrc;
-                     }
-
-                     const color = extractColorFromName(name);
-                     const condition = extractConditionFromName(name); // << Извлекаем состояние
-                     const type = extractPartType(name);              // << Извлекаем тип
-
-                     if (name !== 'Название не найдено' && quantity > 0) {
-                         partsData.push({ name, quantity, imageUrl, color, condition, type }); // Добавляем condition и type
-                     }
-                 });
-                 return partsData;
-             }
-
-            /** Clears table and resets state (без изменений) */
+            function extractConditionFromName(name) { if (/\sU$/.test(name)) return 'Б/У'; if (/\sN$/.test(name)) return 'Новая'; return 'Неизвестно'; }
+            function extractPartType(name) { let cleanName = name.replace(/\(([^)]+)\)/g, ''); cleanName = cleanName.replace(/\s(U|N)$/, ''); const detectedColor = extractColorFromName(name); if (detectedColor !== 'N/A') { const colorEn = Object.keys(COLOR_MAP).find(key => COLOR_MAP[key] === getCssColor(detectedColor) && /^[a-z\s-]+$/.test(key)); const colorRu = Object.keys(COLOR_MAP).find(key => COLOR_MAP[key] === getCssColor(detectedColor) && /^[а-яё\s-]+$/.test(key)); if(colorEn) cleanName = cleanName.replace(new RegExp(`\\b${colorEn}\\b`, 'gi'), ''); if(colorRu) cleanName = cleanName.replace(new RegExp(`\\b${colorRu}\\b`, 'gi'), ''); cleanName = cleanName.replace(new RegExp(`\\b${detectedColor}\\b`, 'gi'), ''); } cleanName = cleanName.toLowerCase().trim(); for (const keyword of SORTED_TYPE_KEYS) { if (cleanName.includes(keyword)) { return TYPE_KEYWORDS[keyword]; } } return 'Другое'; }
+            function parseBasketHtml(htmlString) { const parser = new DOMParser(); const doc = parser.parseFromString(htmlString, 'text/html'); const itemsContainer = doc.querySelector('.basket-share-detail__items'); if (!itemsContainer) throw new Error("Не найден контейнер деталей ('.basket-share-detail__items'). Проверьте структуру HTML."); const items = itemsContainer.querySelectorAll('.basket-share-detail__item'); if (items.length === 0) { showMessage("В файле не найдено элементов корзины ('.basket-share-detail__item').", 'warning'); return []; } const partsData = []; let baseUrl = 'https://shop-device.ru'; const baseTag = doc.querySelector('base[href]'); if (baseTag?.href?.startsWith('http')) baseUrl = baseTag.href.replace(/\/$/, ''); items.forEach((item, index) => { const nameElement = item.querySelector('.basket-share-detail__item__name a.dark_link'); const quantityElement = item.querySelector('.basket-share-detail__item__quantity'); const imageElement = item.querySelector('.basket-share-detail__item__image img'); let name = nameElement?.textContent.trim() ?? `Название не найдено #${index + 1}`; let quantity = parseInt(quantityElement?.textContent.match(/(\d+)/)?.[1] ?? '0', 10); let imageUrl = null; if (imageElement) { let potentialSrc = imageElement.getAttribute('data-src') || imageElement.getAttribute('src'); if (potentialSrc?.startsWith('/')) imageUrl = baseUrl + potentialSrc; else if (potentialSrc?.startsWith('http')) imageUrl = potentialSrc; } const color = extractColorFromName(name); const condition = extractConditionFromName(name); const type = extractPartType(name); if (quantity > 0) { partsData.push({ name, quantity, imageUrl, color, condition, type }); } }); return partsData; }
             const clearTable = () => { rawPartsData = []; tableBody.innerHTML = ''; totalQuantityCell.textContent = '0'; totalPartsSpan.textContent = '0'; filterSelects.forEach(select => { while (select.options.length > 1) select.remove(1); select.value = 'all'; }); currentFilters = { color: 'all', condition: 'all', type: 'all' }; currentSort = { field: 'number', direction: 'asc' }; table.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc', 'sort-desc')); table.querySelector('#lego-table th[data-sort="number"]')?.classList.add('sort-asc'); fileInfoSpan.textContent = 'HTML файл корзины не выбран...'; htmlFileInput.value = ''; clearMessages(); disableControls(true); };
 
-            /** Populates a filter dropdown (без изменений, но теперь будет вызван для condition и type) */
-            const populateFilter = (column) => { const filterSelect = table.querySelector(`th[data-sort="${column}"] select.filter-column`); if (!filterSelect) return; while (filterSelect.options.length > 1) filterSelect.remove(1); const uniqueValues = [...new Set(rawPartsData.map(part => part[column]))].filter(value => value != null).sort((a, b) => String(a).localeCompare(String(b), 'ru', { sensitivity: 'base' })); uniqueValues.forEach(value => { const option = document.createElement('option'); option.value = value; option.className = 'filter-option'; if (column === 'color' && value !== 'N/A') { const colorCode = getCssColor(value); option.innerHTML = `<span class="filter-option-content"><span class="color-swatch" style="background-color: ${colorCode};"></span><span>${value}</span></span>`; } else { option.textContent = value; } filterSelect.appendChild(option); }); filterSelect.value = currentFilters[column]; };
+            /** Populates a filter dropdown (Updated for Type Prefix) */
+            const populateFilter = (column) => {
+                const filterSelect = table.querySelector(`th[data-sort="${column}"] select.filter-column`);
+                if (!filterSelect) return;
 
-            /** Applies filters and sorting (без изменений) */
-            const applyFiltersAndSort = () => { let filteredData = [...rawPartsData]; Object.keys(currentFilters).forEach(column => { const filterValue = currentFilters[column]; if (filterValue !== 'all') { filteredData = filteredData.filter(part => String(part[column]) === filterValue); } }); const { field, direction } = currentSort; if (field) { filteredData.sort((a, b) => { let valA = a[field]; let valB = b[field]; let comparison = 0; if (field === 'number' || field === 'quantity') { comparison = (Number(valA) || 0) - (Number(valB) || 0); } else { if (valA === 'N/A' && valB !== 'N/A') return 1; if (valA !== 'N/A' && valB === 'N/A') return -1; if (valA === 'Неизвестно' && valB !== 'Неизвестно') return 1; /* Для состояния */ if (valA !== 'Неизвестно' && valB === 'Неизвестно') return -1; comparison = String(valA).localeCompare(String(valB), 'ru', { sensitivity: 'base' }); } return direction === 'asc' ? comparison : (comparison * -1); }); } renderTable(filteredData); updateTotals(filteredData); updateSortIndicators(); };
+                while (filterSelect.options.length > 1) filterSelect.remove(1);
 
-            /** Renders table rows (Updated to show condition and type) */
-            const renderTable = (data) => {
-                tableBody.innerHTML = '';
-                if (data.length === 0) { tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px; color: #777;">Нет данных для отображения</td></tr>'; return; }
-                let rowCount = 1;
-                data.forEach(detail => {
-                    const row = tableBody.insertRow();
-                    row.insertCell().textContent = rowCount++; // №
-                    row.insertCell().textContent = detail.name; // Наименование
-                    const imgCell = row.insertCell(); // Фото
-                    if (detail.imageUrl) { const img = document.createElement('img'); img.src = detail.imageUrl; img.alt = detail.name.substring(0,30); img.classList.add('part-image'); img.onerror = () => { imgCell.innerHTML = '<span class="part-image-placeholder">Фото<br>нет</span>'; }; imgCell.appendChild(img); } else { imgCell.innerHTML = '<span class="part-image-placeholder">Фото<br>нет</span>'; }
-                    row.insertCell().textContent = detail.quantity; // Кол-во
-                    const colorCell = row.insertCell(); // Цвет
-                    const swatch = document.createElement('span'); swatch.className = 'color-swatch'; swatch.style.backgroundColor = getCssColor(detail.color); swatch.title = detail.color; colorCell.appendChild(swatch); colorCell.appendChild(document.createTextNode(` ${detail.color}`));
-                    row.insertCell().textContent = detail.condition; // << Состояние
-                    row.insertCell().textContent = detail.type;      // << Тип
+                const uniqueValues = [...new Set(rawPartsData.map(part => part[column]))]
+                                    .filter(value => value != null) // Keep N/A and Неизвестно
+                                    .sort((a, b) => String(a).localeCompare(String(b), 'ru', { sensitivity: 'base' }));
+
+                uniqueValues.forEach(value => {
+                     const option = document.createElement('option');
+                     option.value = value;
+                     option.className = 'filter-option';
+
+                     if (column === 'color' && value !== 'N/A') {
+                         // Добавляем HTML для цвета (визуальный результат в списке не гарантирован)
+                         const colorCode = getCssColor(value);
+                         option.innerHTML = `<span class="filter-option-content"><span class="color-swatch" style="background-color: ${colorCode};"></span><span>${value}</span></span>`;
+                     } else if (column === 'type') {
+                         // ** NEW: Add prefix for type **
+                         const prefix = TYPE_PREFIX_MAP[value] || '[???]'; // Get prefix or default
+                         option.textContent = `${prefix} ${value}`;
+                     }
+                     else {
+                         option.textContent = value; // Обычный текст для других (Condition)
+                     }
+                     filterSelect.appendChild(option);
                 });
+                filterSelect.value = currentFilters[column];
             };
 
-            /** Updates total quantity display (без изменений) */
+            const applyFiltersAndSort = () => { let filteredData = [...rawPartsData]; Object.keys(currentFilters).forEach(column => { const filterValue = currentFilters[column]; if (filterValue !== 'all') { filteredData = filteredData.filter(part => String(part[column]) === filterValue); } }); const { field, direction } = currentSort; if (field) { filteredData.sort((a, b) => { let valA = a[field]; let valB = b[field]; let comparison = 0; if (field === 'number' || field === 'quantity') { comparison = (Number(valA) || 0) - (Number(valB) || 0); } else { if (valA === 'N/A' && valB !== 'N/A') return 1; if (valA !== 'N/A' && valB === 'N/A') return -1; if (valA === 'Неизвестно' && valB !== 'Неизвестно') return 1; if (valA !== 'Неизвестно' && valB === 'Неизвестно') return -1; comparison = String(valA).localeCompare(String(valB), 'ru', { sensitivity: 'base' }); } return direction === 'asc' ? comparison : (comparison * -1); }); } renderTable(filteredData); updateTotals(filteredData); updateSortIndicators(); };
+            const renderTable = (data) => { tableBody.innerHTML = ''; if (data.length === 0) { tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px; color: #777;">Нет данных для отображения</td></tr>'; return; } let rowCount = 1; data.forEach(detail => { const row = tableBody.insertRow(); row.insertCell().textContent = rowCount++; const cellName = row.insertCell(); cellName.textContent = detail.name; cellName.title = detail.name; const imgCell = row.insertCell(); if (detail.imageUrl) { const img = document.createElement('img'); img.src = detail.imageUrl; img.alt = detail.name.substring(0,30); img.classList.add('part-image'); img.onerror = () => { imgCell.innerHTML = '<span class="part-image-placeholder">Фото<br>нет</span>'; }; imgCell.appendChild(img); } else { imgCell.innerHTML = '<span class="part-image-placeholder">Фото<br>нет</span>'; } row.insertCell().textContent = detail.quantity; const colorCell = row.insertCell(); const swatch = document.createElement('span'); swatch.className = 'color-swatch'; swatch.style.backgroundColor = getCssColor(detail.color); swatch.title = detail.color; colorCell.appendChild(swatch); colorCell.appendChild(document.createTextNode(` ${detail.color}`)); row.insertCell().textContent = detail.condition; row.insertCell().textContent = detail.type; }); };
             const updateTotals = (data) => { const total = data.reduce((sum, part) => sum + part.quantity, 0); totalQuantityCell.textContent = total; totalPartsSpan.textContent = total; };
-
-            /** Updates sort indicators on headers (без изменений) */
             const updateSortIndicators = () => { table.querySelectorAll('thead th').forEach(th => { th.classList.remove('sort-asc', 'sort-desc'); if (th.dataset.sort === currentSort.field) { th.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc'); } }); };
-
-            /** Handles clicks on sortable headers (без изменений) */
             const handleSortClick = (event) => { const header = event.target.closest('th[data-sortable="true"]'); if (!header) return; const field = header.dataset.sort; if (currentSort.field === field) { currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc'; } else { currentSort.field = field; currentSort.direction = 'asc'; } applyFiltersAndSort(); };
-
-            // Export function removed
-
-            /** Disables/Enables Controls (Updated) */
-            const disableControls = (disabled) => {
-                // exportButton убран
-                clearButton.disabled = disabled;
-                filterSelects.forEach(sel => sel.disabled = disabled);
-                table.querySelectorAll('thead th[data-sortable="true"]').forEach(th => {
-                    th.style.cursor = disabled ? 'default' : 'pointer';
-                });
-            };
+            const disableControls = (disabled) => { clearButton.disabled = disabled; filterSelects.forEach(sel => sel.disabled = disabled); table.querySelectorAll('thead th[data-sortable="true"]').forEach(th => { th.style.cursor = disabled ? 'default' : 'pointer'; }); };
 
             // --- Event Listeners ---
-            loadFileButton.addEventListener('click', () => htmlFileInput.click());
-            htmlFileInput.addEventListener('change', (event) => { /* ... (Логика загрузки и парсинга как в предыдущем ответе, но теперь вызывает populateFilter и для condition/type)... */
-                clearMessages();
-                const file = event.target.files[0];
-                if (!file) { fileInfoSpan.textContent = 'Файл не выбран.'; return; }
-                if (!file.name.toLowerCase().endsWith('.html') && !file.name.toLowerCase().endsWith('.htm')) { showMessage('Пожалуйста, выберите файл с расширением .html или .htm', 'error'); htmlFileInput.value = ''; return; }
-                fileInfoSpan.textContent = `Загрузка: ${file.name}...`;
-                disableControls(true);
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        rawPartsData = parseBasketHtml(e.target.result);
-                        if (rawPartsData.length > 0) {
-                            fileInfoSpan.textContent = `Загружен: ${file.name} (${rawPartsData.length} поз.)`;
-                            populateFilter('color');
-                            populateFilter('condition'); // << Заполняем фильтр Состояние
-                            populateFilter('type');      // << Заполняем фильтр Тип
-                            currentSort = { field: 'number', direction: 'asc' }; // Сортировка по №
-                            applyFiltersAndSort();
-                            disableControls(false);
-                            showMessage(`Файл успешно обработан. Найдено позиций: ${rawPartsData.length}`, 'info');
-                        } else {
-                            fileInfoSpan.textContent = `Файл ${file.name} не содержит деталей.`;
-                            clearTable();
-                        }
-                    } catch (error) {
-                        console.error("Ошибка парсинга файла:", error);
-                        showMessage(`Ошибка обработки файла: ${error.message}`, 'error');
-                        clearTable();
-                        fileInfoSpan.textContent = `Ошибка при чтении ${file.name}`;
-                    }
-                };
-                reader.onerror = () => { showMessage(`Не удалось прочитать файл ${file.name}`, 'error'); clearTable(); fileInfoSpan.textContent = `Ошибка чтения файла`; };
-                reader.readAsText(file);
-             });
-            filterSelects.forEach(select => { /* ... (Обработчик фильтров без изменений) ... */ select.addEventListener('change', debounce((event) => { currentFilters[event.target.dataset.column] = event.target.value; applyFiltersAndSort(); }, 250)); });
+            loadFileButton.addEventListener('click', () => { console.log("Load button clicked..."); htmlFileInput.click(); });
+            htmlFileInput.addEventListener('change', (event) => { console.log("File input change."); clearMessages(); const file = event.target.files[0]; if (!file) { console.log("No file."); fileInfoSpan.textContent = 'Файл не выбран.'; return; } console.log("File:", file.name); if (!file.name.toLowerCase().endsWith('.html') && !file.name.toLowerCase().endsWith('.htm')) { showMessage('Пожалуйста, выберите файл с расширением .html или .htm', 'error'); htmlFileInput.value = ''; return; } fileInfoSpan.textContent = `Загрузка: ${file.name}...`; disableControls(true); const reader = new FileReader(); reader.onload = (e) => { console.log("File loaded."); try { if (!e.target || typeof e.target.result !== 'string') { throw new Error("Не удалось прочитать содержимое файла."); } console.log("Parsing..."); rawPartsData = parseBasketHtml(e.target.result); console.log("Parsed items:", rawPartsData.length); if (rawPartsData.length > 0) { fileInfoSpan.textContent = `Загружен: ${file.name} (${rawPartsData.length} поз.)`; console.log("Populating filters..."); populateFilter('color'); populateFilter('condition'); populateFilter('type'); currentSort = { field: 'number', direction: 'asc' }; console.log("Applying filters/sort..."); applyFiltersAndSort(); disableControls(false); showMessage(`Файл успешно обработан. Найдено позиций: ${rawPartsData.length}`, 'info'); console.log("Done."); } else { fileInfoSpan.textContent = `Файл ${file.name} обработан, но не содержит распознанных деталей.`; clearTable(); console.log("No parts found."); } } catch (error) { console.error("Error processing file:", error); showMessage(`Ошибка обработки файла: ${error.message}`, 'error'); clearTable(); fileInfoSpan.textContent = `Ошибка при чтении ${file.name}`; disableControls(true); } finally { htmlFileInput.value = ''; console.log("Input reset."); } }; reader.onerror = (err) => { console.error("FileReader error:", err); showMessage(`Не удалось прочитать файл ${file.name}. Ошибка: ${reader.error?.name ?? 'Неизвестная ошибка'}`, 'error'); clearTable(); fileInfoSpan.textContent = `Ошибка чтения файла`; disableControls(true); htmlFileInput.value = ''; }; console.log("Reading file..."); reader.readAsText(file); });
+            filterSelects.forEach(select => { select.addEventListener('change', debounce((event) => { currentFilters[event.target.dataset.column] = event.target.value; applyFiltersAndSort(); }, 250)); });
             table.querySelector('thead').addEventListener('click', handleSortClick);
             clearButton.addEventListener('click', clearTable);
-            // Export listener removed
 
             // --- Initial State ---
             clearTable();
