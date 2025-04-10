@@ -224,16 +224,23 @@
 
             const items = itemsContainer.querySelectorAll('.basket-share-detail__item');
             const partsData = [];
+            // Определяем базовый URL. Сначала ищем тег <base>, если нет, используем shop-device.ru
             let baseUrl = 'https://shop-device.ru';
             const baseTag = doc.querySelector('base[href]');
-            if (baseTag && baseTag.href.startsWith('http')) {
-                baseUrl = baseTag.href.replace(/\/$/, '');
+            if (baseTag && baseTag.href && baseTag.href.startsWith('http')) {
+                baseUrl = baseTag.href.replace(/\/$/, ''); // Убираем слэш в конце, если есть
+                 console.log(`Using base URL from <base> tag: ${baseUrl}`);
+            } else {
+                 console.log(`Using default base URL: ${baseUrl}`);
             }
+
 
             items.forEach((item) => {
                 const nameElement = item.querySelector('.basket-share-detail__item__name a.dark_link');
                 const quantityElement = item.querySelector('.basket-share-detail__item__quantity');
-                const imageElement = item.querySelector('.basket-share-detail__item__image img');
+                // Ищем изображение внутри ссылки, которая может быть родителем img
+                const imageLink = item.querySelector('.basket-share-detail__item__image a.thumb');
+                const imageElement = imageLink ? imageLink.querySelector('img') : item.querySelector('.basket-share-detail__item__image img'); // Запасной вариант
 
                 let name = nameElement ? nameElement.textContent.trim() : 'Название не найдено';
                 let quantity = 0;
@@ -243,13 +250,30 @@
                     if (match) quantity = parseInt(match[1], 10);
                 }
 
-                let imageUrl = imageElement ? imageElement.getAttribute('src') : 'placeholder.png';
-                if (imageUrl && imageUrl.startsWith('/')) {
-                    imageUrl = baseUrl + imageUrl;
+                // --- ИЗМЕНЕННЫЙ БЛОК ДЛЯ URL ИЗОБРАЖЕНИЯ ---
+                let imageUrl = 'placeholder.png'; // Заглушка по умолчанию
+                if (imageElement) {
+                    // Приоритет отдаем data-src, если он есть, иначе берем src
+                    let potentialSrc = imageElement.getAttribute('data-src') || imageElement.getAttribute('src');
+
+                    if (potentialSrc) { // Если нашли какой-либо источник (data-src или src)
+                        if (potentialSrc.startsWith('/')) {
+                            // Если это корневой относительный путь (как в data-src), добавляем базу
+                            imageUrl = baseUrl + potentialSrc;
+                        } else if (potentialSrc.startsWith('http')) {
+                            // Если это уже абсолютный URL
+                            imageUrl = potentialSrc;
+                        }
+                        // Игнорируем локальные пути сохранения (начинающиеся с точки или без слеша/http)
+                        // console.log(`Resolved image URL: ${imageUrl}`); // Для отладки
+                    }
                 }
+                // --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА ---
 
                 if (name !== 'Название не найдено' && quantity > 0) {
                     partsData.push({ name, quantity, imageUrl });
+                } else {
+                    console.warn("Skipping item due to missing name or quantity:", item);
                 }
             });
 
@@ -263,7 +287,7 @@
         function displayParts(parts) {
             partsListDiv.innerHTML = '<h2>Содержимое корзины из файла</h2>';
             if (!parts || parts.length === 0) {
-                partsListDiv.innerHTML += '<p>Детали не найдены.</p>';
+                // Не добавляем сообщение здесь, оно будет добавлено из вызывающей функции
                 return;
             }
 
@@ -274,10 +298,12 @@
                 const img = document.createElement('img');
                 img.src = part.imageUrl;
                 img.alt = part.name.substring(0, 50);
-                img.onerror = () => {
+                img.onerror = () => { // Обработчик ошибок загрузки изображения
                     img.alt = 'Изображение недоступно';
                     img.style.border = '1px solid red';
+                    // Устанавливаем прозрачный пиксель или другую заглушку
                     img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                    console.warn(`Failed to load image: ${part.imageUrl}`);
                 };
 
                 const infoDiv = document.createElement('div');
@@ -307,29 +333,41 @@
          */
         function displayMessage(text, type = "info", append = false) {
             if (!append && type !== 'loading') {
-                clearMessages(false);
+                clearMessages(false); // Очищаем все, кроме info и loading
             } else if (!append) {
-                clearMessages(true);
+                 // Если не добавляем и это loading, очищаем все (включая info)
+                 clearMessages(true);
             }
 
+
             const messageDiv = document.createElement('div');
-            messageDiv.textContent = text;
+            messageDiv.innerHTML = text; // Используем innerHTML для поддержки тегов в сообщениях (например, <strong>)
             messageDiv.classList.add(`${type}-message`);
             messageArea.appendChild(messageDiv);
         }
 
         /**
          * Удаляет сообщения.
-         * @param {boolean} all - Удалить все сообщения или только не-info.
+         * @param {boolean} all - Удалить все сообщения или только не-info и не-loading.
          */
         function clearMessages(all = true) {
             const types = all
                 ? ['.info-message', '.error-message', '.warning-message', '.loading-message']
-                : ['.error-message', '.warning-message', '.loading-message'];
+                : ['.error-message', '.warning-message', '.loading-message']; // По умолчанию не трогаем info
             types.forEach(selector => {
-                messageArea.querySelectorAll(selector).forEach(msg => msg.remove());
+                messageArea.querySelectorAll(selector).forEach(msg => {
+                    // Не удаляем изначальное info сообщение с инструкцией
+                    if (!msg.querySelector('strong') || msg.querySelector('strong').textContent !== 'Как использовать:') {
+                         msg.remove();
+                    } else if (all) {
+                        // Если нужно удалить все, включая инструкцию (например, при новой загрузке)
+                        // Но пока оставим инструкцию всегда видимой
+                        // msg.remove();
+                    }
+                });
             });
         }
+
 
         /** Удаляет сообщения о загрузке */
         function clearLoadingMessage() {
